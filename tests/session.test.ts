@@ -11,9 +11,10 @@ import {
 let userId: string;
 
 beforeAll(async () => {
+    await prisma.user.deleteMany({ where: { email: 'session-test@session.local' } });
     const user = await prisma.user.create({
         data: {
-            email: 'session-test@example.com',
+            email: 'session-test@session.local',
             passwordHash: await hashPassword('pw'),
             name: 'Session Test',
             role: 'STUDENT',
@@ -38,7 +39,7 @@ describe('session utils', () => {
     it("getSessionWithUser returns the user for a valid session", async () => {
         const { id } = await createSession(userId);
         const result = await getSessionWithUser(id);
-        expect(result?.user.email).toBe("session-test@example.com");
+        expect(result?.user.email).toBe("session-test@session.local");
     });
 
     it("getSessionWithUser returns null for an expired session", async () => {
