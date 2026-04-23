@@ -5,6 +5,7 @@ import { prisma } from "../../src/lib/prisma";
 import { hashPassword } from "../../src/utils/password";
 
 const COOKIE = process.env.SESSION_COOKIE_NAME ?? "classroom_sid";
+const TEST_EMAIL_SUFFIX = "integration.local";
 
 export function parseCookie(res: request.Response): string | undefined {
     const raw = res.headers["set-cookie"];
@@ -19,7 +20,7 @@ export function parseCookie(res: request.Response): string | undefined {
 export async function loginAs(
     app: Express,
     role: Role,
-    emailSuffix = "example.com"
+    emailSuffix = TEST_EMAIL_SUFFIX,
 ): Promise<string> {
     const email = `${role.toLowerCase()}-${Date.now()}-${Math.random()
         .toString(36)
@@ -52,6 +53,6 @@ export async function loginAs(
 
 export async function cleanTestUsers() {
     await prisma.user.deleteMany({
-        where: { email: { endsWith: "@example.com" } },
+        where: { email: { endsWith: `@${TEST_EMAIL_SUFFIX}` } },
     });
 }
