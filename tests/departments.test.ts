@@ -7,6 +7,7 @@ import { loginAs, cleanTestUsers } from './helpers/auth';
 const app = createApp();
 
 beforeEach(async () => {
+    await prisma.subject.deleteMany({});
     await prisma.department.deleteMany({});
     await cleanTestUsers();
 });

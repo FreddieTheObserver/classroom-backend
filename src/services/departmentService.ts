@@ -71,15 +71,14 @@ export async function updateDepartment(
 }
 
 export async function deleteDepartment(id: string): Promise<void> {
+    const subjectCount = await prisma.subject.count({ where: { departmentId: id } });
+    if (subjectCount > 0) {
+        throw new AppError(409, `Cannot delete: ${subjectCount} subject(s) still reference this department`);
+    }
     try {
-        await prisma.department.delete({
-            where: { id },
-        });
+        await prisma.department.delete({ where: { id } });
     } catch (err) {
-        if (
-            err instanceof Prisma.PrismaClientKnownRequestError &&
-            err.code === "P2025"
-        ) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
             throw new AppError(404, "DepartmentNotFound");
         }
         throw err;
