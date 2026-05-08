@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterAll } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
 import { createApp } from "../src/index";
 import { prisma } from "../src/lib/prisma";
@@ -10,10 +10,6 @@ beforeEach(async () => {
     await prisma.subject.deleteMany({});
     await prisma.department.deleteMany({});
     await cleanTestUsers();
-});
-
-afterAll(async () => {
-    await prisma.$disconnect();
 });
 
 async function createDept(cookie: string, code: string, name = `Dept ${code}`) {
@@ -81,5 +77,39 @@ describe("DELETE /api/departments/:id — with subjects", () => {
         const res = await request(app).delete(`/api/departments/${deptId}`).set("Cookie", cookie);
         expect(res.status).toBe(409);
         expect(res.body.error).toMatch(/1 subject/);
+    });
+});
+
+describe("POST /api/subjects — validation + auth", () => {
+    it("returns 409 on duplicate code", async () => {
+        const cookie = await loginAs(app, "ADMIN");
+        const deptId = await createDept(cookie, "DUPCTX");
+        await request(app).post("/api/subjects").set("Cookie", cookie)
+            .send({ name: "S1", code: "DUP", departmentId: deptId });
+        const res = await request(app).post("/api/subjects").set("Cookie", cookie)
+            .send({ name: "S2", code: "DUP", departmentId: deptId });
+        expect(res.status).toBe(409);
+    });
+
+    it("returns 403 when a student tries to create", async () => {
+        const adminCookie = await loginAs(app, "ADMIN");
+        const deptId = await createDept(adminCookie, "STU");
+        const studentCookie = await loginAs(app, "STUDENT");
+        const res = await request(app).post("/api/subjects").set("Cookie", studentCookie)
+            .send({ name: "S", code: "S1", departmentId: deptId });
+        expect(res.status).toBe(403);
+    });
+});
+
+describe("DELETE /api/subjects/:id", () => {
+    it("deletes unconditionally", async () => {
+        const cookie = await loginAs(app, "ADMIN");
+        const deptId = await createDept(cookie, "DELSUB");
+        const created = await request(app).post("/api/subjects").set("Cookie", cookie)
+            .send({ name: "S", code: "DS1", departmentId: deptId });
+        const res = await request(app)
+            .delete(`/api/subjects/${created.body.subject.id}`)
+            .set("Cookie", cookie);
+        expect(res.status).toBe(204);
     });
 });

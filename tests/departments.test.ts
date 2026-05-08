@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterAll } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../src/index';
 import { prisma } from '../src/lib/prisma';
@@ -10,10 +10,6 @@ beforeEach(async () => {
     await prisma.subject.deleteMany({});
     await prisma.department.deleteMany({});
     await cleanTestUsers();
-});
-
-afterAll(async() => {
-    await prisma.$disconnect();
 });
 
 describe("POST /api/departments", () => {

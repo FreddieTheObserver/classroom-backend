@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterAll } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../src/index';
 import { prisma } from '../src/lib/prisma';
@@ -16,10 +16,6 @@ beforeEach(async () => {
         await prisma.session.deleteMany({ where: { userId: { in: ids } } });
         await prisma.user.deleteMany({ where: { id: { in: ids } } });
     }
-});
-
-afterAll(async () => {
-    await prisma.$disconnect();
 });
 
 function getCookie(res: request.Response): string | undefined {
