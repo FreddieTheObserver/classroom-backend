@@ -63,7 +63,7 @@ export async function updateSubject(id: string, patch: UpdateInput): Promise<Sub
             if (err.code === "P2002") throw new AppError(409, "SubjectCodeInUse");
             if (err.code === "P2025") throw new AppError(404, "SubjectNotFound");
         }
-    throw err;
+        throw err;
     }
 }
 
