@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { authRouter } from './routes/auth';
 import { departmentsRouter } from './routes/departments';
+import { subjectsRouter } from './routes/subjects';
 import { errorHandler } from './middleware/errorHandler'
 
 export function createApp() {
@@ -24,6 +25,7 @@ export function createApp() {
 
     app.use("/api/auth", authRouter);
     app.use("/api/departments", departmentsRouter);
+    app.use("/api/subjects", subjectsRouter);
     app.use(errorHandler);
 
     return app;
